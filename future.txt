@@ -1,0 +1,17 @@
+now when the user tap on the plus button in the detailpradeshpage he can see additempopup form, where i want to integrate my assignItemToPradesh api where user have to give the raw data like this
+{
+    "pId": 10,
+    "itemId": 29,
+    "qty": "40"
+}
+where he will assign new item to pradesh successfully
+
+
+table name 
+pradesh
+
+===================================================
+
+remaining part
+
+new pradesh name list

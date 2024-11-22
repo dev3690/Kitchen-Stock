@@ -1,0 +1,171 @@
+.reports-container {
+  padding: 20px;
+  background-color: #F0F4FF;
+  min-height: 100vh;
+}
+
+.reports-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.reports-header-name {
+    margin-left: 10px;
+  font-size: 24px;
+  color: #333;
+}
+
+.back-button {
+  background: none;
+  border: none;
+  font-size: 24px;
+  max-width: 50px;
+  color: #333;
+  cursor: pointer;
+  margin: 0px 10px 0px 0px;
+}
+
+.header-icons {
+  display: flex;
+  gap: 10px;
+}
+
+.icon-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+  font-size: 400px;
+}
+
+.reports-subheader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 20px 0;
+  padding: 10px 10px;
+  background-color: white;
+  border-radius: 20px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  gap: 50px;
+}
+
+.report-title-container {
+  flex-grow: 1;
+  text-align: center;
+}
+
+.report-title-container h2 {
+  margin: 10px 120px 0px 520px;
+  font-size: 24px;
+  color: #333;
+}
+
+.filter-button {
+  background-color: #4285F4;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 16px;
+}
+
+.filter-button:hover {
+  background-color: #3367D6;
+}
+
+.table-container {
+  background-color: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 15px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+th {
+  background-color: #f5f5f5;
+  font-weight: bold;
+  color: #333;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+@media (max-width: 768px) {
+  .reports-header {
+    flex-direction: row;
+    align-items: flex-end;
+  }
+  .reports-subheader{
+    flex-direction: row;
+    align-items: flex-end;
+    
+  }
+  
+
+.report-title-container h2 {
+    margin: 10px 120px 0px 50px;
+  }
+
+  .filter-button {
+    background-color: #4285F4;
+    padding: 10px 10px;
+    margin-left: 0px;
+    /* gap: 5px; */
+  }
+
+  .reports-header-name {
+    margin: 10px 0;
+  }
+
+  .header-icons {
+    align-self: flex-end;
+  }
+
+  .table-container {
+    overflow-x: auto;
+  }
+
+  table {
+    font-size: 14px;
+  }
+
+  th, td {
+    padding: 10px;
+  }
+
+  .reports-subheader {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .report-title-container {
+    margin-bottom: 10px;
+  }
+
+  .filter-button {
+    width: 100%;
+    justify-content: center;
+  }
+}

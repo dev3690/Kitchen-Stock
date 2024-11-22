@@ -1,0 +1,105 @@
+.filter-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    max-height: 1000px;
+  }
+  
+  .filter-popup {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 300px;
+    max-width: 100%;
+    max-height: 100%;
+  }
+  
+  .filter-popup h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .filter-popup select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .filter-popup-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  
+  .filter-popup-buttons {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .filter-popup-buttons button:first-child {
+    background-color: #4285F4;
+    color: white;
+  }
+  
+  .filter-popup-buttons button:last-child {
+    background-color: #f0f0f0;
+    color: #333;
+  }
+
+  .range-selector {
+    margin-top: 15px;
+  }
+
+  .range-selector label {
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  .range-selector input[type="range"] {
+    width: 100%;
+    margin-bottom: 5px;
+  }
+
+  .range-values {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    color: #666;
+  }
+
+  .filter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .filter-header h2 {
+    margin: 0;
+  }
+
+  .clear-filters-button {
+    background-color: #f0f0f0;
+    color: #333;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+
+  .clear-filters-button:hover {
+    background-color: #e0e0e0;
+  }
