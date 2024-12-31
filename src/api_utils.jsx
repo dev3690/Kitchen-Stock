@@ -12,6 +12,7 @@ const getTableData = `${localApiUrl}/getData`
 const assignItemToPradesh = `${localApiUrl}/assignItemToPradesh`
 const getPradeshItemsDetails = (id) => `${localApiUrl}/getPradeshItemsDetails`
 const getManageItemsByItemId = `${localApiUrl}/getManageItemsByItemId`
+const getManageItems = `${localApiUrl}/getManageItems`
 
 const headers = {
     'Content-Type': 'application/json'
@@ -131,6 +132,22 @@ const getTransactionHistory = async (itemId) => {
   }
 };
 
+const getManageItemsData = async () => {
+  try {
+    const response = await callAxiosApi(getManageItems);
+    if (!response.data.errorStatus) {
+      return {
+        add: response.data.data.add || [],
+        remove: response.data.data.remove || []
+      };
+    }
+    return { add: [], remove: [] };
+  } catch (error) {
+    console.error('Error fetching manage items:', error);
+    return { add: [], remove: [] };
+  }
+};
+
 export {
     loginApi,
     dashboardApi,
@@ -143,5 +160,6 @@ export {
     getItemData,
     insertItemData,
     manageItem,
-    getTransactionHistory
+    getTransactionHistory,
+    getManageItemsData
 }

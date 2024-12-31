@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
@@ -6,10 +6,11 @@ import '../styles/ReportsPage.css';
 import { FaFilter, FaArrowLeft } from 'react-icons/fa';
 import FilterPopup from '../components/FilterPopup';
 import Header from '../components/Header';
+import { InputText } from 'primereact/inputtext';
+import { callAxiosApi, getManageItemsData } from '../api_utils';
 import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
-import { InputText } from 'primereact/inputtext';
 
 
 const reportData = [
@@ -32,7 +33,7 @@ function ReportsPage({ currentLanguage, handleLanguageChange }) {
     const [filterName, setFilterName] = useState('');
     const [filterSeva, setFilterSeva] = useState('');
     const [filterDateRange, setFilterDateRange] = useState(null);
-    const [filteredData, setFilteredData] = useState(reportData);
+    const [filteredData, setFilteredData] = useState([]);
     const [filterGivenRange, setFilterGivenRange] = useState({ min: 0, max: 75000 });
     const [filterUsedRange, setFilterUsedRange] = useState({ min: 0, max: 75000 });
     const [globalFilterPurchase, setGlobalFilterPurchase] = useState('');
@@ -40,6 +41,8 @@ function ReportsPage({ currentLanguage, handleLanguageChange }) {
     const [first1, setFirst1] = useState(0);
     const [first2, setFirst2] = useState(0);
     const [rows, setRows] = useState(5);
+    const [addData, setAddData] = useState([]);
+    const [removeData, setRemoveData] = useState([]);
 
     const uniqueCategories = [...new Set(reportData.map(item => item.category))];
     const uniqueNames = [...new Set(reportData.map(item => item.name))];
@@ -73,6 +76,19 @@ function ReportsPage({ currentLanguage, handleLanguageChange }) {
     const handleUsedRangeChange = (min, max) => {
         setFilterUsedRange({ min, max });
     };
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const data = await getManageItemsData();
+                setAddData(data.add);
+                setRemoveData(data.remove);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
+        fetchData();
+    }, []);
 
     return (
         <div className="reports-container">
@@ -111,7 +127,7 @@ function ReportsPage({ currentLanguage, handleLanguageChange }) {
             <div className="tables-wrapper">
                 {/* Purchase Table */}
                 <div className="table-container">
-                    <h3>Purchase Details</h3>
+                    <h3>Add</h3>
                     <div className="table-header">
                         <span className="search-input">
                             <InputText
@@ -122,7 +138,7 @@ function ReportsPage({ currentLanguage, handleLanguageChange }) {
                         </span>
                     </div>
                     <DataTable 
-                        value={filteredData}
+                        value={addData}
                         scrollable 
                         scrollHeight="400px"
                         stripedRows
@@ -132,28 +148,28 @@ function ReportsPage({ currentLanguage, handleLanguageChange }) {
                         first={first1}
                         onPage={(e) => setFirst1(e.first)}
                         globalFilter={globalFilterPurchase}
-                        // sortMode="multiple"
+                        sortMode="multiple"
                         removableSort
-                        // filterDisplay="row"
                         showGridlines
                         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                         currentPageReportTemplate="Showing {first} to {last} of {totalRecords}"
                         rowsPerPageOptions={[5, 10, 25, 50]}
                     >
-                        <Column field="slNo" header="SL No" sortable filterPlaceholder="Search by SL No" />
-                        <Column field="name" header="Name" sortable filterPlaceholder="Search by name" />
-                        <Column field="unit" header="Unit" sortable filterPlaceholder="Search by unit" />
-                        <Column field="quantity" header="Quantity" sortable filterPlaceholder="Search by quantity" />
-                        <Column field="category" header="Category" sortable filterPlaceholder="Search by category" />
-                        <Column field="date" header="Date" sortable filterPlaceholder="Search by date" />
-                        <Column field="given" header="Purchase" sortable filterPlaceholder="Search by purchase" />
-                        <Column field="seva" header="Seva" sortable filterPlaceholder="Search by seva" />
+                        <Column field="manageId" header="Sr." style={{ minWidth: '70px' }} sortable />
+                        <Column field="itemName" header="Name" style={{ minWidth: '100px' }} sortable />
+                        <Column field="unit" header="Unit" style={{ minWidth: '70px' }} sortable />
+                        <Column field="type" header="Type" style={{ minWidth: '80px' }} sortable />
+                        <Column field="qty" header="Quantity" style={{ minWidth: '70px' }} sortable />
+                        <Column field="categoryName" header="Category" style={{ minWidth: '100px' }} sortable />
+                        <Column field="date" header="Date" style={{ minWidth: '130px' }} sortable />
+                        <Column field="sevakName" header="SevakName" style={{ minWidth: '120px' }} sortable />
+                        <Column field="sevakNo" header="No." style={{ minWidth: '120px' }} sortable />
                     </DataTable>
                 </div>
 
                 {/* Used Table */}
                 <div className="table-container">
-                    <h3>Usage Details</h3>
+                    <h3>Remove</h3>
                     <div className="table-header">
                         <span className="search-input">
                             <InputText
@@ -164,7 +180,7 @@ function ReportsPage({ currentLanguage, handleLanguageChange }) {
                         </span>
                     </div>
                     <DataTable 
-                        value={filteredData}
+                        value={removeData}
                         scrollable 
                         scrollHeight="400px"
                         stripedRows
@@ -175,21 +191,21 @@ function ReportsPage({ currentLanguage, handleLanguageChange }) {
                         onPage={(e) => setFirst2(e.first)}
                         globalFilter={globalFilterUsage}
                         sortMode="multiple"
-                        // removableSort
-                        // filterDisplay="row"
+                        removableSort
                         showGridlines
                         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                         currentPageReportTemplate="Showing {first} to {last} of {totalRecords}"
                         rowsPerPageOptions={[5, 10, 25, 50]}
                     >
-                        <Column field="slNo" header="SL No" sortable filterPlaceholder="Search by SL No" />
-                        <Column field="name" header="Name" sortable filterPlaceholder="Search by name" />
-                        <Column field="unit" header="Unit" sortable filterPlaceholder="Search by unit" />
-                        <Column field="quantity" header="Quantity" sortable filterPlaceholder="Search by quantity" />
-                        <Column field="category" header="Category" sortable filterPlaceholder="Search by category" />
-                        <Column field="date" header="Date" sortable filterPlaceholder="Search by date" />
-                        <Column field="used" header="Used" sortable filterPlaceholder="Search by used" />
-                        <Column field="given" header="Given" sortable filterPlaceholder="Search by given" />
+                        <Column field="manageId" header="Sr." style={{ minWidth: '70px' }} sortable />
+                        <Column field="itemName" header="Name" style={{ minWidth: '100px' }} sortable />
+                        <Column field="unit" header="Unit" style={{ minWidth: '70px' }} sortable />
+                        <Column field="qty" header="Quantity" style={{ minWidth: '70px' }} sortable />
+                        <Column field="categoryName" header="Category" style={{ minWidth: '100px' }} sortable />
+                        <Column field="date" header="Date" style={{ minWidth: '130px' }} sortable />
+                        <Column field="type" header="Type" style={{ minWidth: '80px' }} sortable />
+                        <Column field="sevakName" header="SevakName" style={{ minWidth: '120px' }} sortable />
+                        <Column field="sevakNo" header="No." style={{ minWidth: '120px' }} sortable />
                     </DataTable>
                 </div>
             </div>
