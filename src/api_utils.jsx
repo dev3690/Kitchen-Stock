@@ -1,8 +1,8 @@
 import axios from "axios"
 
-// const localApiUrl = "http://27.116.52.24:8052"
-const localApiUrl = "http://192.168.29.73:3690"
-// const localApiUrl = "http://localhost:3690"
+// const localApiUrl = "http://27.116.52.24:8060" // live server
+const localApiUrl = "http://192.168.29.73:3690" // local server
+// const localApiUrl = "http://localhost:3690" // local server
 
 // API endpoints
 const loginApi = `${localApiUrl}/login`
@@ -11,6 +11,7 @@ const dashboardApi = `${localApiUrl}/dashboard`
 const getTableData = `${localApiUrl}/getData`
 const assignItemToPradesh = `${localApiUrl}/assignItemToPradesh`
 const getPradeshItemsDetails = (id) => `${localApiUrl}/getPradeshItemsDetails`
+const getManageItemsByItemId = `${localApiUrl}/getManageItemsByItemId`
 
 const headers = {
     'Content-Type': 'application/json'
@@ -102,6 +103,34 @@ const manageItem = async (itemData) => {
   }
 };
 
+const getTransactionHistory = async (itemId) => {
+  try {
+    const response = await callAxiosApi(getManageItemsByItemId, {
+      itemId: itemId.toString()
+    });
+    
+    if (!response.data.errorStatus) {
+      return response.data.data.map(item => ({
+        manageId: item.manageId,
+        itemName: item.itemName,
+        unit: item.unit,
+        qty: item.qty,
+        date: item.date,
+        type: item.type,
+        sevakName: item.sevakName,
+        sevakNo: item.sevakNo,
+        gujName: item.gujName,
+        categoryName: item.categoryName,
+        itemTo: item.itemTo
+      }));
+    }
+    return [];
+  } catch (error) {
+    console.error('Error fetching transaction history:', error);
+    return [];
+  }
+};
+
 export {
     loginApi,
     dashboardApi,
@@ -113,5 +142,6 @@ export {
     getCategoryData,
     getItemData,
     insertItemData,
-    manageItem
+    manageItem,
+    getTransactionHistory
 }

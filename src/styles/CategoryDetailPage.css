@@ -33,6 +33,9 @@
   border-radius: 10px;
   background-color: #FFFFFF66;
   transition: transform 0.2s;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
 }
 
 .card:hover {
@@ -85,6 +88,55 @@
   margin-top: 0.5rem;
 }
 
+.card-content {
+  position: relative;
+  z-index: 1;
+}
+
+.expand-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  color: #666;
+  padding: 5px;
+}
+
+.expanded-content {
+  padding: 15px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  background-color: rgba(255, 255, 255, 0.9);
+}
+
+/* DataTable customizations */
+.expanded-content .p-datatable {
+  font-size: 0.9rem;
+}
+
+.expanded-content .p-datatable-wrapper {
+  overflow: auto;
+}
+
+.expanded-content .p-datatable .p-datatable-thead > tr > th {
+  position: sticky;
+  top: 0;
+  background: #f5f5f5;
+  z-index: 1;
+}
+
+.expanded-content .p-datatable .p-datatable-tbody > tr > td {
+  padding: 0.5rem;
+}
+
+/* Ensure horizontal scrolling works properly */
+.expanded-content .p-datatable-wrapper {
+  overflow-x: auto;
+  overflow-y: auto;
+  max-width: 100%;
+}
+
 @media (max-width: 768px) {
   .category-detail-container {
     padding: 10px;
@@ -116,4 +168,31 @@
     padding: 10px 70px;
     font-size: 2.5rem;
   }
+}
+
+@media screen and (max-width: 768px) {
+  .expanded-content {
+    padding: 10px;
+  }
+  
+  .expanded-content .p-datatable {
+    font-size: 0.8rem;
+  }
+}
+
+.green-row {
+    background-color: rgba(75, 181, 67, 0.15) !important;
+}
+
+.red-row {
+    background-color: rgba(255, 76, 76, 0.15) !important;
+}
+
+/* Override striped row styling for colored rows */
+.p-datatable-striped .p-datatable-tbody > tr.green-row:nth-child(even) {
+    background-color: rgba(75, 181, 67, 0.15) !important;
+}
+
+.p-datatable-striped .p-datatable-tbody > tr.red-row:nth-child(even) {
+    background-color: rgba(255, 76, 76, 0.15) !important;
 }

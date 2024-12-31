@@ -1,9 +1,15 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { DataTable } from 'primereact/datatable';
+import { Column } from 'primereact/column';
 import '../styles/ReportsPage.css';
 import { FaFilter, FaArrowLeft } from 'react-icons/fa';
 import FilterPopup from '../components/FilterPopup';
 import Header from '../components/Header';
+import "primereact/resources/themes/lara-light-indigo/theme.css";
+import "primereact/resources/primereact.min.css";
+import "primeicons/primeicons.css";
+import { InputText } from 'primereact/inputtext';
 
 
 const reportData = [
@@ -29,6 +35,11 @@ function ReportsPage({ currentLanguage, handleLanguageChange }) {
     const [filteredData, setFilteredData] = useState(reportData);
     const [filterGivenRange, setFilterGivenRange] = useState({ min: 0, max: 75000 });
     const [filterUsedRange, setFilterUsedRange] = useState({ min: 0, max: 75000 });
+    const [globalFilterPurchase, setGlobalFilterPurchase] = useState('');
+    const [globalFilterUsage, setGlobalFilterUsage] = useState('');
+    const [first1, setFirst1] = useState(0);
+    const [first2, setFirst2] = useState(0);
+    const [rows, setRows] = useState(5);
 
     const uniqueCategories = [...new Set(reportData.map(item => item.category))];
     const uniqueNames = [...new Set(reportData.map(item => item.name))];
@@ -65,21 +76,6 @@ function ReportsPage({ currentLanguage, handleLanguageChange }) {
 
     return (
         <div className="reports-container">
-            {/* <div className="reports-header">
-                <button className="back-button" onClick={() => navigate('/dashboard')}>
-                    <FaArrowLeft />
-                </button>
-                <h1 className="reports-header-name">Kitchen Stock</h1>
-                <div className="header-icons right-icons">
-                    <button className="icon-button" onClick={handleLanguageChange}>
-                        <img
-                            src="/assets/languages.png"
-                            alt="Change Language"
-                            className="icon"
-                        />
-                    </button>
-                </div>
-            </div> */}
             <Header
                 currentLanguage={currentLanguage}
                 handleLanguageChange={handleLanguageChange}
@@ -112,37 +108,90 @@ function ReportsPage({ currentLanguage, handleLanguageChange }) {
                 filterUsedRange={filterUsedRange}
                 setFilterUsedRange={setFilterUsedRange}
             />
-            <div className="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>SL No</th>
-                            <th>Name</th>
-                            <th>Unit</th>
-                            <th>Quantity</th>
-                            <th>Category</th>
-                            <th>Date</th>
-                            <th>Seva</th>
-                            <th>Given</th>
-                            <th>Used</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filteredData.map((item, index) => (
-                            <tr key={index}>
-                                <td>{item.slNo}</td>
-                                <td>{item.name}</td>
-                                <td>{item.unit}</td>
-                                <td>{item.quantity}</td>
-                                <td>{item.category}</td>
-                                <td>{item.date}</td>
-                                <td>{item.seva}</td>
-                                <td>{item.given}</td>
-                                <td>{item.used}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+            <div className="tables-wrapper">
+                {/* Purchase Table */}
+                <div className="table-container">
+                    <h3>Purchase Details</h3>
+                    <div className="table-header">
+                        <span className="search-input">
+                            <InputText
+                                placeholder="Search..."
+                                value={globalFilterPurchase}
+                                onChange={(e) => setGlobalFilterPurchase(e.target.value)}
+                            />
+                        </span>
+                    </div>
+                    <DataTable 
+                        value={filteredData}
+                        scrollable 
+                        scrollHeight="400px"
+                        stripedRows
+                        size="small"
+                        paginator
+                        rows={rows}
+                        first={first1}
+                        onPage={(e) => setFirst1(e.first)}
+                        globalFilter={globalFilterPurchase}
+                        // sortMode="multiple"
+                        removableSort
+                        // filterDisplay="row"
+                        showGridlines
+                        paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords}"
+                        rowsPerPageOptions={[5, 10, 25, 50]}
+                    >
+                        <Column field="slNo" header="SL No" sortable filterPlaceholder="Search by SL No" />
+                        <Column field="name" header="Name" sortable filterPlaceholder="Search by name" />
+                        <Column field="unit" header="Unit" sortable filterPlaceholder="Search by unit" />
+                        <Column field="quantity" header="Quantity" sortable filterPlaceholder="Search by quantity" />
+                        <Column field="category" header="Category" sortable filterPlaceholder="Search by category" />
+                        <Column field="date" header="Date" sortable filterPlaceholder="Search by date" />
+                        <Column field="given" header="Purchase" sortable filterPlaceholder="Search by purchase" />
+                        <Column field="seva" header="Seva" sortable filterPlaceholder="Search by seva" />
+                    </DataTable>
+                </div>
+
+                {/* Used Table */}
+                <div className="table-container">
+                    <h3>Usage Details</h3>
+                    <div className="table-header">
+                        <span className="search-input">
+                            <InputText
+                                placeholder="Search..."
+                                value={globalFilterUsage}
+                                onChange={(e) => setGlobalFilterUsage(e.target.value)}
+                            />
+                        </span>
+                    </div>
+                    <DataTable 
+                        value={filteredData}
+                        scrollable 
+                        scrollHeight="400px"
+                        stripedRows
+                        size="small"
+                        paginator
+                        rows={rows}
+                        first={first2}
+                        onPage={(e) => setFirst2(e.first)}
+                        globalFilter={globalFilterUsage}
+                        sortMode="multiple"
+                        // removableSort
+                        // filterDisplay="row"
+                        showGridlines
+                        paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords}"
+                        rowsPerPageOptions={[5, 10, 25, 50]}
+                    >
+                        <Column field="slNo" header="SL No" sortable filterPlaceholder="Search by SL No" />
+                        <Column field="name" header="Name" sortable filterPlaceholder="Search by name" />
+                        <Column field="unit" header="Unit" sortable filterPlaceholder="Search by unit" />
+                        <Column field="quantity" header="Quantity" sortable filterPlaceholder="Search by quantity" />
+                        <Column field="category" header="Category" sortable filterPlaceholder="Search by category" />
+                        <Column field="date" header="Date" sortable filterPlaceholder="Search by date" />
+                        <Column field="used" header="Used" sortable filterPlaceholder="Search by used" />
+                        <Column field="given" header="Given" sortable filterPlaceholder="Search by given" />
+                    </DataTable>
+                </div>
             </div>
         </div>
     );

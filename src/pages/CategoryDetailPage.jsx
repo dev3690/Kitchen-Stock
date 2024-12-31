@@ -6,7 +6,9 @@ import AddItemPopup from "../components/AddItemPopup";
 import PlusFormPopup from "../components/PlusFormPopup";
 import MinusFormPopup from "../components/MinusFormPopup";
 import Header from '../components/Header';
-import { getItemData, getCategoryData, manageItem } from '../api_utils';
+import { getItemData, getCategoryData, manageItem, getTransactionHistory } from '../api_utils';
+import { DataTable } from 'primereact/datatable';
+import { Column } from 'primereact/column';
 
 function CategoryDetailPage() {
   const { id } = useParams();
@@ -20,6 +22,8 @@ function CategoryDetailPage() {
   const [isPlusFormPopupOpen, setIsPlusFormPopupOpen] = useState(false);
   const [selectedGrainCard, setSelectedGrainCard] = useState(null);
   const [isMinusFormPopupOpen, setIsMinusFormPopupOpen] = useState(false);
+  const [expandedCards, setExpandedCards] = useState(new Set());
+  const [transactionData, setTransactionData] = useState({});
 
   useEffect(() => {
     const fetchData = async () => {
@@ -134,6 +138,24 @@ function CategoryDetailPage() {
     }
   };
 
+  const toggleCard = async (id) => {
+    setExpandedCards((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+        getTransactionHistory(id).then(data => {
+          setTransactionData(prev => ({
+            ...prev,
+            [id]: data
+          }));
+        });
+      }
+      return newSet;
+    });
+  };
+
   return (
     <div className="category-detail-container">
       <Header
@@ -157,29 +179,67 @@ function CategoryDetailPage() {
       ) : (
         <div className="card-container">
           {categoryItems.map((item) => (
-            <div
-              key={item.id}
-              className="card"
-              style={{ backgroundColor: "#FFFFFF66" }}
-            >
-              <div className="card-header">
-                <button
-                  className="quantity-button"
-                  onClick={() => handleQuantityChange(item.id, 1)}
+            <div key={item.id} className="card" style={{ backgroundColor: "#FFFFFF66" }}>
+              <div className="card-content">
+                <div className="card-header">
+                  <button
+                    className="quantity-button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleQuantityChange(item.id, 1);
+                    }}
+                  >
+                    <img src="/assets/new1.png" alt="Increase" className="icon" />
+                  </button>
+                  <button
+                    className="quantity-button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleQuantityChange(item.id, -1);
+                    }}
+                  >
+                    <img src="/assets/minus1.png" alt="Decrease" className="icon" />
+                  </button>
+                </div>
+                <h2 className="card-title">
+                  {currentLanguage === "eng" ? item.nameEng : item.nameGuj}
+                </h2>
+                <p className="card-quantity">{item.quantity} {item.unit}</p>
+                <button 
+                  className="expand-button"
+                  onClick={() => toggleCard(item.id)}
                 >
-                  <img src="/assets/new1.png" alt="Increase" className="icon" />
-                </button>
-                <button
-                  className="quantity-button"
-                  onClick={() => handleQuantityChange(item.id, -1)}
-                >
-                  <img src="/assets/minus1.png" alt="Decrease" className="icon" />
+                  {expandedCards.has(item.id) ? '▼' : '▶'}
                 </button>
               </div>
-              <h2 className="card-title">
-                {currentLanguage === "eng" ? item.nameEng : item.nameGuj}
-              </h2>
-              <p className="card-quantity">{item.quantity} {item.unit}</p>
+
+              {expandedCards.has(item.id) && (
+                <div className="expanded-content">
+                  <DataTable 
+                    value={transactionData[item.id] || []}
+                    scrollable 
+                    scrollHeight="200px"
+                    scrollDirection="both"
+                    stripedRows
+                    size="small"
+                    showGridlines
+                    loading={!transactionData[item.id]}
+                    rowClassName={(rowData) => ({
+                      'green-row': rowData.itemTo === 'Add',
+                      'red-row': rowData.itemTo === 'Remove'
+                    })}
+                  >
+                    <Column field="manageId" header="Sr." style={{ minWidth: '70px' }} />
+                    <Column field="itemName" header="Name" style={{ minWidth: '100px' }} />
+                    <Column field="unit" header="Unit" style={{ minWidth: '70px' }} />
+                    <Column field="type" header="Type" style={{ minWidth: '80px' }} />
+                    <Column field="qty" header="Qty" style={{ minWidth: '70px' }} />
+                    <Column field="date" header="Date" style={{ minWidth: '130px' }} />
+                    <Column field="sevakName" header="Sevak Name" style={{ minWidth: '120px' }} />
+                    <Column field="sevakNo" header="Sevak Number" style={{ minWidth: '120px' }} />
+                  </DataTable>
+                </div>
+              )}
             </div>
           ))}
         </div>

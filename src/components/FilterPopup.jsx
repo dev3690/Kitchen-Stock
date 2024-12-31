@@ -11,7 +11,7 @@ function FilterPopup({
   filterSeva,
   setFilterSeva,
   filterDateRange,
-  setFilterDateRange,
+  setFilterDateRange,   
   uniqueCategories,
   uniqueNames,
   uniqueSevas,
