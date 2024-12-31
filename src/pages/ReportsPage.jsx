@@ -43,29 +43,92 @@ function ReportsPage({ currentLanguage, handleLanguageChange }) {
     const [rows, setRows] = useState(5);
     const [addData, setAddData] = useState([]);
     const [removeData, setRemoveData] = useState([]);
+    const [selectedSevaTypes, setSelectedSevaTypes] = useState({
+        purchase: false,
+        seva: false,
+        used: false,
+        given: false
+    });
+    const [filteredAddData, setFilteredAddData] = useState([]);
+    const [filteredRemoveData, setFilteredRemoveData] = useState([]);
+    const [uniqueCategories, setUniqueCategories] = useState([]);
+    const [uniqueNames, setUniqueNames] = useState([]);
 
-    const uniqueCategories = [...new Set(reportData.map(item => item.category))];
-    const uniqueNames = [...new Set(reportData.map(item => item.name))];
-    const uniqueSevas = [...new Set(reportData.map(item => item.seva))];
+    const formatDate = (rowData) => {
+        if (!rowData.date) return '';
+        try {
+            const date = new Date(rowData.date);
+            if (isNaN(date.getTime())) return ''; // Return empty string for invalid dates
+            
+            return date.toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            }).replace(/\//g, '-');
+        } catch (error) {
+            console.error('Error formatting date:', error);
+            return '';
+        }
+    };
 
     const handleFilter = () => {
-        const filtered = reportData.filter(item => {
-            const itemDate = new Date(item.date);
+        const filterDataByType = (data) => {
+            if (!Object.values(selectedSevaTypes).some(value => value)) {
+                return data;
+            }
+            
+            return data.filter(item => {
+                const itemType = item.type?.toLowerCase() || '';
+                return selectedSevaTypes[itemType];
+            });
+        };
+
+        const isDateInRange = (dateStr) => {
+            if (!filterDateRange || !filterDateRange.start || !filterDateRange.end) {
+                return true;
+            }
+
+            try {
+                // Parse the item date (assuming API date format)
+                const itemDate = new Date(dateStr);
+                
+                // Parse start and end dates from the filter (dd-mm-yyyy format)
+                const [startDay, startMonth, startYear] = filterDateRange.start.split('-');
+                const [endDay, endMonth, endYear] = filterDateRange.end.split('-');
+                
+                const startDate = new Date(startYear, startMonth - 1, startDay);
+                const endDate = new Date(endYear, endMonth - 1, endDay);
+
+                // Set time to midnight for accurate comparison
+                itemDate.setHours(0, 0, 0, 0);
+                startDate.setHours(0, 0, 0, 0);
+                endDate.setHours(0, 0, 0, 0);
+
+                return itemDate >= startDate && itemDate <= endDate;
+            } catch (error) {
+                console.error('Error comparing dates:', error);
+                return false;
+            }
+        };
+
+        const filteredAdd = filterDataByType(addData).filter(item => {
             return (
-                (filterCategory === '' || item.category === filterCategory) &&
-                (filterName === '' || item.name === filterName) &&
-                (filterSeva === '' || item.seva === filterSeva) &&
-                (!filterDateRange ||
-                    (filterDateRange.start && filterDateRange.end &&
-                        itemDate >= new Date(filterDateRange.start) &&
-                        itemDate <= new Date(filterDateRange.end))) &&
-                (filterGivenRange.min === '' || item.given >= Number(filterGivenRange.min)) &&
-                (filterGivenRange.max === '' || item.given <= Number(filterGivenRange.max)) &&
-                (filterUsedRange.min === '' || item.used >= Number(filterUsedRange.min)) &&
-                (filterUsedRange.max === '' || item.used <= Number(filterUsedRange.max))
+                (filterCategory === '' || item.categoryName === filterCategory) &&
+                (filterName === '' || item.itemName === filterName) &&
+                isDateInRange(item.date)
             );
         });
-        setFilteredData(filtered);
+
+        const filteredRemove = filterDataByType(removeData).filter(item => {
+            return (
+                (filterCategory === '' || item.categoryName === filterCategory) &&
+                (filterName === '' || item.itemName === filterName) &&
+                isDateInRange(item.date)
+            );
+        });
+
+        setFilteredAddData(filteredAdd);
+        setFilteredRemoveData(filteredRemove);
         setIsFilterPopupOpen(false);
     };
 
@@ -83,12 +146,43 @@ function ReportsPage({ currentLanguage, handleLanguageChange }) {
                 const data = await getManageItemsData();
                 setAddData(data.add);
                 setRemoveData(data.remove);
+                setFilteredAddData(data.add);
+                setFilteredRemoveData(data.remove);
+
+                const allData = [...data.add, ...data.remove];
+                
+                const categories = [...new Set(allData.map(item => item.categoryName))];
+                setUniqueCategories(categories);
+
+                const names = [...new Set(allData.map(item => item.itemName))];
+                setUniqueNames(names);
+
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
         };
         fetchData();
     }, []);
+
+    useEffect(() => {
+        const filterDataByType = (data) => {
+            if (!Object.values(selectedSevaTypes).some(value => value)) {
+                return data;
+            }
+            
+            return data.filter(item => {
+                const itemType = item.type?.toLowerCase() || '';
+                return selectedSevaTypes[itemType];
+            });
+        };
+
+        setFilteredAddData(filterDataByType(addData));
+        setFilteredRemoveData(filterDataByType(removeData));
+    }, [selectedSevaTypes, addData, removeData]);
+
+    const serialNumberTemplate = (rowData, props) => {
+        return props.rowIndex + 1 + (props.paginator ? props.first : 0);
+    };
 
     return (
         <div className="reports-container">
@@ -117,12 +211,13 @@ function ReportsPage({ currentLanguage, handleLanguageChange }) {
                 setFilterDateRange={setFilterDateRange}
                 uniqueCategories={uniqueCategories}
                 uniqueNames={uniqueNames}
-                uniqueSevas={uniqueSevas}
                 handleFilter={handleFilter}
                 filterGivenRange={filterGivenRange}
                 setFilterGivenRange={setFilterGivenRange}
                 filterUsedRange={filterUsedRange}
                 setFilterUsedRange={setFilterUsedRange}
+                selectedSevaTypes={selectedSevaTypes}
+                setSelectedSevaTypes={setSelectedSevaTypes}
             />
             <div className="tables-wrapper">
                 {/* Purchase Table */}
@@ -138,7 +233,7 @@ function ReportsPage({ currentLanguage, handleLanguageChange }) {
                         </span>
                     </div>
                     <DataTable 
-                        value={addData}
+                        value={filteredAddData}
                         scrollable 
                         scrollHeight="400px"
                         stripedRows
@@ -155,13 +250,24 @@ function ReportsPage({ currentLanguage, handleLanguageChange }) {
                         currentPageReportTemplate="Showing {first} to {last} of {totalRecords}"
                         rowsPerPageOptions={[5, 10, 25, 50]}
                     >
-                        <Column field="manageId" header="Sr." style={{ minWidth: '70px' }} sortable />
+                        <Column 
+                            header="Sr." 
+                            body={serialNumberTemplate} 
+                            style={{ minWidth: '70px' }}
+                        />
                         <Column field="itemName" header="Name" style={{ minWidth: '100px' }} sortable />
                         <Column field="unit" header="Unit" style={{ minWidth: '70px' }} sortable />
                         <Column field="type" header="Type" style={{ minWidth: '80px' }} sortable />
                         <Column field="qty" header="Quantity" style={{ minWidth: '70px' }} sortable />
                         <Column field="categoryName" header="Category" style={{ minWidth: '100px' }} sortable />
-                        <Column field="date" header="Date" style={{ minWidth: '130px' }} sortable />
+                        <Column 
+                            field="date" 
+                            header="Date" 
+                            style={{ minWidth: '130px' }} 
+                            sortable
+                            body={formatDate}
+                            sortField="date"
+                        />
                         <Column field="sevakName" header="SevakName" style={{ minWidth: '120px' }} sortable />
                         <Column field="sevakNo" header="No." style={{ minWidth: '120px' }} sortable />
                     </DataTable>
@@ -180,7 +286,7 @@ function ReportsPage({ currentLanguage, handleLanguageChange }) {
                         </span>
                     </div>
                     <DataTable 
-                        value={removeData}
+                        value={filteredRemoveData}
                         scrollable 
                         scrollHeight="400px"
                         stripedRows
@@ -197,12 +303,23 @@ function ReportsPage({ currentLanguage, handleLanguageChange }) {
                         currentPageReportTemplate="Showing {first} to {last} of {totalRecords}"
                         rowsPerPageOptions={[5, 10, 25, 50]}
                     >
-                        <Column field="manageId" header="Sr." style={{ minWidth: '70px' }} sortable />
+                        <Column 
+                            header="Sr." 
+                            body={serialNumberTemplate} 
+                            style={{ minWidth: '70px' }}
+                        />
                         <Column field="itemName" header="Name" style={{ minWidth: '100px' }} sortable />
                         <Column field="unit" header="Unit" style={{ minWidth: '70px' }} sortable />
                         <Column field="qty" header="Quantity" style={{ minWidth: '70px' }} sortable />
                         <Column field="categoryName" header="Category" style={{ minWidth: '100px' }} sortable />
-                        <Column field="date" header="Date" style={{ minWidth: '130px' }} sortable />
+                        <Column 
+                            field="date" 
+                            header="Date" 
+                            style={{ minWidth: '130px' }} 
+                            sortable
+                            body={formatDate}
+                            sortField="date"
+                        />
                         <Column field="type" header="Type" style={{ minWidth: '80px' }} sortable />
                         <Column field="sevakName" header="SevakName" style={{ minWidth: '120px' }} sortable />
                         <Column field="sevakNo" header="No." style={{ minWidth: '120px' }} sortable />

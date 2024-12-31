@@ -1,8 +1,8 @@
 .category-detail-container {
-  padding: 20px;
+  /* padding: 20px; */
   background-color: rgba(244, 247, 254, 1);
   min-height: 90vh;
-  width: 95%;
+  /* width: 95%; */
 }
 
 .category-detail-header {
@@ -29,7 +29,7 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 2rem;
+  /* padding: 2rem; */
   border-radius: 10px;
   background-color: #FFFFFF66;
   transition: transform 0.2s;
@@ -139,9 +139,16 @@
 
 @media (max-width: 768px) {
   .category-detail-container {
-    padding: 10px;
+    /* padding: 10px; */
+    padding: 0px;
   }
 
+  .card{
+    padding: 0%;
+  }
+  .card-content{
+    padding: 10px 0px;
+  }
 
   .card-header {
     margin-right: 30px;

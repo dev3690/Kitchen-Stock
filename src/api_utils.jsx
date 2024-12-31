@@ -1,7 +1,7 @@
 import axios from "axios"
 
-// const localApiUrl = "http://27.116.52.24:8060" // live server
-const localApiUrl = "http://192.168.29.73:3690" // local server
+const localApiUrl = "http://27.116.52.24:8060" // live server
+// const localApiUrl = "http://192.168.29.73:3690" // local server
 // const localApiUrl = "http://localhost:3690" // local server
 
 // API endpoints

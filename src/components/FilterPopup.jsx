@@ -8,25 +8,31 @@ function FilterPopup({
   setFilterCategory,
   filterName,
   setFilterName,
-  filterSeva,
-  setFilterSeva,
   filterDateRange,
   setFilterDateRange,   
   uniqueCategories,
   uniqueNames,
-  uniqueSevas,
   handleFilter,
   filterGivenRange,
   setFilterGivenRange,
   filterUsedRange,
-  setFilterUsedRange
+  setFilterUsedRange,
+  selectedSevaTypes,
+  setSelectedSevaTypes
 }) {
+  const [showCustomRange, setShowCustomRange] = useState(false);
   const [customStartDate, setCustomStartDate] = useState('');
   const [customEndDate, setCustomEndDate] = useState('');
 
   if (!isOpen) return null;
 
   const handleDateRangeChange = (range) => {
+    if (range === 'custom') {
+      setShowCustomRange(true);
+      return;
+    }
+    
+    setShowCustomRange(false);
     const end = new Date();
     let start = new Date();
     
@@ -43,8 +49,6 @@ function FilterPopup({
       case 'year':
         start.setFullYear(end.getFullYear() - 1);
         break;
-      case 'custom':
-        return; // Don't set the date range yet, wait for custom input
       default:
         start = null;
         end = null;
@@ -62,16 +66,32 @@ function FilterPopup({
 
   const handleCustomDateChange = () => {
     if (customStartDate && customEndDate) {
-      setFilterDateRange({ start: customStartDate, end: customEndDate });
+        try {
+            // Convert the HTML date input format (yyyy-mm-dd) to dd-mm-yyyy
+            const formatToDisplayDate = (dateStr) => {
+                const date = new Date(dateStr);
+                return date.toLocaleDateString('en-GB', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                }).replace(/\//g, '-');
+            };
+
+            setFilterDateRange({
+                start: formatToDisplayDate(customStartDate),
+                end: formatToDisplayDate(customEndDate)
+            });
+        } catch (error) {
+            console.error('Error formatting custom dates:', error);
+        }
     }
   };
 
-  const handleGivenRangeChange = (min, max) => {
-    setFilterGivenRange({ min, max });
-  };
-
-  const handleUsedRangeChange = (min, max) => {
-    setFilterUsedRange({ min, max });
+  const handleSevaTypeChange = (sevaType) => {
+    setSelectedSevaTypes(prev => ({
+      ...prev,
+      [sevaType]: !prev[sevaType]
+    }));
   };
 
   return (
@@ -82,56 +102,114 @@ function FilterPopup({
           <button className="clear-filters-button" onClick={() => {
             setFilterCategory('');
             setFilterName('');
-            setFilterSeva('');
             setFilterDateRange(null);
             setFilterGivenRange({ min: 0, max: 75000 });
             setFilterUsedRange({ min: 0, max: 75000 });
+            setSelectedSevaTypes({
+              purchase: false,
+              seva: false,
+              used: false,
+              given: false
+            });
           }}>
             Clear All Filters
           </button>
         </div>
+
         <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)}>
           <option value="">All Categories</option>
           {uniqueCategories.map(category => (
             <option key={category} value={category}>{category}</option>
           ))}
         </select>
+
         <select value={filterName} onChange={(e) => setFilterName(e.target.value)}>
           <option value="">All Names</option>
           {uniqueNames.map(name => (
             <option key={name} value={name}>{name}</option>
           ))}
         </select>
-        <select value={filterSeva} onChange={(e) => setFilterSeva(e.target.value)}>
-          <option value="">All Sevas</option>
-          {uniqueSevas.map(seva => (
-            <option key={seva} value={seva}>{seva}</option>
-          ))}
-        </select>
-        <select onChange={(e) => handleDateRangeChange(e.target.value)}>
-          <option value="">All Time</option>
-          <option value="week">Last Week</option>
-          <option value="month">Last Month</option>
-          <option value="6months">Last 6 Months</option>
-          <option value="year">Last Year</option>
-          <option value="custom">Custom Range</option>
-        </select>
-        {filterDateRange && filterDateRange.start && filterDateRange.end && (
-          <div className="custom-date-range">
-            <input
-              type="date"
-              value={filterDateRange.start}
-              onChange={(e) => setFilterDateRange(prev => ({ ...prev, start: e.target.value }))}
-            />
-            <input
-              type="date"
-              value={filterDateRange.end}
-              onChange={(e) => setFilterDateRange(prev => ({ ...prev, end: e.target.value }))}
-            />
-          </div>
-        )}
 
-        <div className="range-selector">
+        <div className="seva-types-container">
+          <h3>Seva Types</h3>
+          <div className="seva-checkboxes">
+            <label>
+              <input
+                type="checkbox"
+                checked={selectedSevaTypes.purchase}
+                onChange={() => handleSevaTypeChange('purchase')}
+              />
+              Purchase
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={selectedSevaTypes.seva}
+                onChange={() => handleSevaTypeChange('seva')}
+              />
+              Seva
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={selectedSevaTypes.used}
+                onChange={() => handleSevaTypeChange('used')}
+              />
+              Used
+            </label>
+            <label>
+              <input
+                type="checkbox"
+                checked={selectedSevaTypes.given}
+                onChange={() => handleSevaTypeChange('given')}
+              />
+              Given
+            </label>
+          </div>
+        </div>
+
+        <div className="date-filter-section">
+          <select 
+            onChange={(e) => handleDateRangeChange(e.target.value)}
+            className="date-select"
+          >
+            <option value="custom">All Time</option>
+            {/* <option value="week">Last Week</option>
+            <option value="month">Last Month</option>
+            <option value="6months">Last 6 Months</option>
+            <option value="year">Last Year</option> */}
+            <option value="custom">Custom Range</option>
+          </select>
+
+          {showCustomRange && (
+            <div className="custom-date-inputs">
+              <div className="date-input-group">
+                <label>Start Date:</label>
+                <input
+                  type="date"
+                  value={customStartDate}
+                  onChange={(e) => {
+                    setCustomStartDate(e.target.value);
+                    handleCustomDateChange();
+                  }}
+                />
+              </div>
+              <div className="date-input-group">
+                <label>End Date:</label>
+                <input
+                  type="date"
+                  value={customEndDate}
+                  onChange={(e) => {
+                    setCustomEndDate(e.target.value);
+                    handleCustomDateChange();
+                  }}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* <div className="range-selector">
           <label>Given Range:</label>
           <input
             type="range"
@@ -151,9 +229,9 @@ function FilterPopup({
             <span>₹{filterGivenRange.min}</span>
             <span>{filterGivenRange.max}</span>
           </div>
-        </div>
+        </div> */}
 
-        <div className="range-selector">
+        {/* <div className="range-selector">
           <label>Used Range:</label>
           <input
             type="range"
@@ -173,7 +251,7 @@ function FilterPopup({
             <span>₹{filterUsedRange.min}</span>
             <span>₹{filterUsedRange.max}</span>
           </div>
-        </div>
+        </div> */}
 
         <div className="filter-popup-buttons">
           <button onClick={() => { handleFilter(); onClose(); }}>Apply Filter</button>

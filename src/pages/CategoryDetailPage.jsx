@@ -9,6 +9,7 @@ import Header from '../components/Header';
 import { getItemData, getCategoryData, manageItem, getTransactionHistory } from '../api_utils';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
+import { InputText } from 'primereact/inputtext';
 
 function CategoryDetailPage() {
   const { id } = useParams();
@@ -24,21 +25,24 @@ function CategoryDetailPage() {
   const [isMinusFormPopupOpen, setIsMinusFormPopupOpen] = useState(false);
   const [expandedCards, setExpandedCards] = useState(new Set());
   const [transactionData, setTransactionData] = useState({});
+  const [rows, setRows] = useState(5);
+  const [first, setFirst] = useState(0);
+  const [globalFilter, setGlobalFilter] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
         setError(null); // Reset error state
-        
+
         // Fetch category details
         const categoryData = await getCategoryData();
         const currentCategory = categoryData.find(cat => cat.categoryId === parseInt(id));
-        
+
         if (!currentCategory) {
           throw new Error('Category not found');
         }
-        
+
         setCategoryName({
           nameEng: currentCategory.engName,
           nameGuj: currentCategory.gujName
@@ -56,7 +60,7 @@ function CategoryDetailPage() {
           createdAt: item.createdAt,
           updatedAt: item.updatedAt
         })) : [];
-        
+
         setCategoryItems(formattedItems);
       } catch (err) {
         setError(err.message || 'Failed to load items');
@@ -103,9 +107,9 @@ function CategoryDetailPage() {
       const response = await manageItem(formData);
       if (!response.errorStatus) {
         // Update the item quantity in the local state
-        setCategoryItems(prevItems => 
-          prevItems.map(item => 
-            item.id === formData.itemId 
+        setCategoryItems(prevItems =>
+          prevItems.map(item =>
+            item.id === formData.itemId
               ? { ...item, quantity: response.data.item.qty }
               : item
           )
@@ -122,9 +126,9 @@ function CategoryDetailPage() {
       const response = await manageItem(formData);
       if (!response.errorStatus) {
         // Update the item quantity in the local state
-        setCategoryItems(prevItems => 
-          prevItems.map(item => 
-            item.id === formData.itemId 
+        setCategoryItems(prevItems =>
+          prevItems.map(item =>
+            item.id === formData.itemId
               ? { ...item, quantity: response.data.item.qty }
               : item
           )
@@ -156,6 +160,35 @@ function CategoryDetailPage() {
     });
   };
 
+  const formatDate = (rowData) => {
+    if (!rowData.date) return '';
+    try {
+      const date = new Date(rowData.date);
+      if (isNaN(date.getTime())) return ''; // Return empty string for invalid dates
+
+      return date.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      }).replace(/\//g, '-');
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return '';
+    }
+  };
+
+  const serialNumberTemplate = (rowData, props) => {
+    return props.rowIndex + 1 + (props.paginator ? props.first : 0);
+  };
+
+  const calculateScrollHeight = () => {
+    const rowHeight = 43;
+    const headerHeight = 37;
+    const paginatorHeight = 53;
+    const totalHeight = (rows * rowHeight) + headerHeight + paginatorHeight;
+    return Math.min(Math.max(totalHeight, 200), 600);
+  };
+
   return (
     <div className="category-detail-container">
       <Header
@@ -171,7 +204,7 @@ function CategoryDetailPage() {
           {currentLanguage === "eng" ? categoryName.nameEng : categoryName.nameGuj}
         </h1>
       </div>
-      
+
       {isLoading ? (
         <div className="loading">Loading items...</div>
       ) : error ? (
@@ -201,24 +234,34 @@ function CategoryDetailPage() {
                     <img src="/assets/minus1.png" alt="Decrease" className="icon" />
                   </button>
                 </div>
-                <h2 className="card-title">
+                <h2 className="card-title" onClick={() => toggleCard(item.id)} style={{ fontSize: "30px" }}>
                   {currentLanguage === "eng" ? item.nameEng : item.nameGuj}
                 </h2>
-                <p className="card-quantity">{item.quantity} {item.unit}</p>
-                <button 
+                <p className="card-quantity" style={{ fontSize: "20px" }} onClick={() => toggleCard(item.id)}>{item.quantity} {item.unit}</p>
+                {/* <button 
                   className="expand-button"
                   onClick={() => toggleCard(item.id)}
                 >
                   {expandedCards.has(item.id) ? '▼' : '▶'}
-                </button>
+                </button> */}
               </div>
 
               {expandedCards.has(item.id) && (
                 <div className="expanded-content">
-                  <DataTable 
+                  <div className="table-header">
+                    <span className="search-input">
+                      <InputText
+                        placeholder="Search..."
+                        value={globalFilter}
+                        onChange={(e) => setGlobalFilter(e.target.value)}
+                        className="p-inputtext-sm"
+                      />
+                    </span>
+                  </div>
+                  <DataTable
                     value={transactionData[item.id] || []}
-                    scrollable 
-                    scrollHeight="200px"
+                    scrollable
+                    scrollHeight={`${calculateScrollHeight()}px`}
                     scrollDirection="both"
                     stripedRows
                     size="small"
@@ -228,15 +271,68 @@ function CategoryDetailPage() {
                       'green-row': rowData.itemTo === 'Add',
                       'red-row': rowData.itemTo === 'Remove'
                     })}
+                    paginator
+                    rows={rows}
+                    first={first}
+                    onPage={(e) => {
+                      setFirst(e.first);
+                      setRows(e.rows);
+                    }}
+                    globalFilter={globalFilter}
+                    sortMode="multiple"
+                    removableSort
+                    paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                    currentPageReportTemplate="Showing {first} to {last} of {totalRecords}"
+                    rowsPerPageOptions={[5, 10, 25, 50]}
                   >
-                    <Column field="manageId" header="Sr." style={{ minWidth: '70px' }} />
-                    <Column field="itemName" header="Name" style={{ minWidth: '100px' }} />
-                    <Column field="unit" header="Unit" style={{ minWidth: '70px' }} />
-                    <Column field="type" header="Type" style={{ minWidth: '80px' }} />
-                    <Column field="qty" header="Qty" style={{ minWidth: '70px' }} />
-                    <Column field="date" header="Date" style={{ minWidth: '130px' }} />
-                    <Column field="sevakName" header="Sevak Name" style={{ minWidth: '120px' }} />
-                    <Column field="sevakNo" header="Sevak Number" style={{ minWidth: '120px' }} />
+                    <Column
+                      header="Sr."
+                      body={serialNumberTemplate}
+                      style={{ minWidth: '70px' }}
+                    />
+                    <Column
+                      field="itemName"
+                      header="Name"
+                      style={{ minWidth: '100px' }}
+                      sortable
+                    />
+                    <Column
+                      field="unit"
+                      header="Unit"
+                      style={{ minWidth: '70px' }}
+                      sortable
+                    />
+                    <Column
+                      field="type"
+                      header="Type"
+                      style={{ minWidth: '80px' }}
+                      sortable
+                    />
+                    <Column
+                      field="qty"
+                      header="Qty"
+                      style={{ minWidth: '70px' }}
+                      sortable
+                    />
+                    <Column
+                      field="date"
+                      header="Date"
+                      style={{ minWidth: '130px' }}
+                      body={formatDate}
+                      sortable
+                    />
+                    <Column
+                      field="sevakName"
+                      header="Sevak Name"
+                      style={{ minWidth: '120px' }}
+                      sortable
+                    />
+                    <Column
+                      field="sevakNo"
+                      header="Sevak Number"
+                      style={{ minWidth: '120px' }}
+                      sortable
+                    />
                   </DataTable>
                 </div>
               )}

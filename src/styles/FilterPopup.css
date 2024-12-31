@@ -103,3 +103,67 @@
   .clear-filters-button:hover {
     background-color: #e0e0e0;
   }
+
+  .seva-types-container {
+    margin: 15px 0;
+  }
+
+  .seva-checkboxes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 10px;
+  }
+
+  .seva-checkboxes label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+  }
+
+  .seva-checkboxes input[type="checkbox"] {
+    cursor: pointer;
+  }
+
+  .date-filter-section {
+    margin: 15px 0;
+  }
+
+  .date-select {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+
+  .custom-date-inputs {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+  }
+
+  .date-input-group {
+    flex: 1;
+  }
+
+  .date-input-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 14px;
+  }
+
+  .date-input-group input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+
+  @media (max-width: 768px) {
+    .custom-date-inputs {
+      flex-direction: column;
+      gap: 10px;
+    }
+  }

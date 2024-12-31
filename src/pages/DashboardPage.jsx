@@ -6,6 +6,7 @@ import AddItemPopup from '../components/AddItemPopup';
 import { FaSearch } from 'react-icons/fa';
 import Header from '../components/Header';
 import { getCategoryData, insertItemData } from '../api_utils';
+import { AutoComplete } from 'primereact/autocomplete';
 
 function DashboardPage({ changeLanguage, language }) {
   const navigate = useNavigate();
@@ -18,6 +19,9 @@ function DashboardPage({ changeLanguage, language }) {
   const [filteredCategories, setFilteredCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
+  const [selectedItem, setSelectedItem] = useState(null);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -77,6 +81,53 @@ function DashboardPage({ changeLanguage, language }) {
     setCurrentLanguage(prev => prev === 'eng' ? 'guj' : 'eng');
   };
 
+  const getAllItems = () => {
+    let items = [];
+    categories.forEach(category => {
+      if (category.items) {
+        items = [...items, ...category.items.map(item => ({
+          ...item,
+          categoryName: currentLanguage === 'eng' ? category.nameEng : category.nameGuj
+        }))];
+      }
+    });
+    return items;
+  };
+
+  const searchItems = (event) => {
+    const query = event.query.toLowerCase();
+    const allItems = getAllItems();
+    
+    const filtered = allItems.filter(item => {
+      const itemName = currentLanguage === 'eng' ? 
+        item.nameEng.toLowerCase() : 
+        item.nameGuj.toLowerCase();
+      return itemName.includes(query);
+    });
+
+    setSuggestions(filtered);
+  };
+
+  const onItemSelect = (e) => {
+    setSelectedItem(e.value);
+    if (e.value?.categoryId) {
+      navigate(`/category/${e.value.categoryId}`);
+    }
+  };
+
+  const itemTemplate = (item) => {
+    return (
+      <div className="search-item">
+        <div className="search-item-name">
+          {currentLanguage === 'eng' ? item.nameEng : item.nameGuj}
+        </div>
+        <div className="search-item-category">
+          {item.categoryName}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="dashboard-container">
       <Header 
@@ -91,15 +142,19 @@ function DashboardPage({ changeLanguage, language }) {
       ) : (
         <>
           <div className="search-container">
-            <div className="search-bar">
-              <input
-                type="text"
-                placeholder={currentLanguage === 'eng' ? "Search..." : "શોધો..."}
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-              <FaSearch className="search-icon" />
-            </div>
+            <AutoComplete
+              value={searchQuery}
+              suggestions={suggestions}
+              completeMethod={searchItems}
+              field={currentLanguage === 'eng' ? 'nameEng' : 'nameGuj'}
+              onChange={(e) => setSearchQuery(e.value)}
+              onSelect={onItemSelect}
+              placeholder={currentLanguage === 'eng' ? "Search items..." : "વસ્તુઓ શોધો..."}
+              itemTemplate={itemTemplate}
+              className="search-autocomplete"
+              delay={0}
+              showClear
+            />
           </div>
           <div className="card-container">
             {filteredCategories.map((category) => (
@@ -107,9 +162,12 @@ function DashboardPage({ changeLanguage, language }) {
                 key={category.id}
                 className="card"
                 onClick={() => handleCardClick(category.id)}
-                style={{ backgroundColor: '#ffffff' }}
               >
-                <div className="card-header">
+                <div className="card-header" style={{ 
+                  display: 'flex', 
+                  justifyContent: 'center', 
+                  alignItems: 'center' 
+                }}>
                   <button 
                     className="assign-button" 
                     onClick={(e) => {
