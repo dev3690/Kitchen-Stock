@@ -76,7 +76,8 @@ function AddItemPopup({ isOpen, onClose, onSubmit, categoryId, categoryName, cur
               required
             />
           </div>
-          <div className="form-group">
+
+          {/* <div className="form-group">
             <label htmlFor="unit">
               {currentLanguage === 'eng' ? 'Unit' : 'એકમ'}:
             </label>
@@ -93,6 +94,21 @@ function AddItemPopup({ isOpen, onClose, onSubmit, categoryId, categoryName, cur
               <option value="L">L</option>
             </select>
           </div>
+           */}
+            <div className="form-group">
+            <label htmlFor="unit">
+              {currentLanguage === 'eng' ? 'Unit' : 'એકમ'}:
+            </label>
+            <input
+              type="text"
+              // placeholder='Item Name (Gujarati)'
+              id="unit"
+              value={unit}
+              onChange={(e) => setUnit(e.target.value)}
+              required
+            />
+          </div>
+
           <div className="form-group">
             <label htmlFor="Location">
               {currentLanguage === 'eng' ? 'Location' : 'સ્થળ'}:

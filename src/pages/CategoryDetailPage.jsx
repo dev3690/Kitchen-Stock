@@ -285,7 +285,8 @@ function CategoryDetailPage() {
                   onClick={() => toggleCard(item.id)}
                 >
                   {/* {item.quantity} {item.unit} */}
-                  Location : {item.location}
+                  {/* Location : {item.location} */}
+                  {item.location}
                 </p>
                 {/* <button 
                   className="expand-button"
