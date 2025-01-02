@@ -5,18 +5,26 @@ import { AuthContext } from "../context/AuthContext";
 import AddItemPopup from "../components/AddItemPopup";
 import PlusFormPopup from "../components/PlusFormPopup";
 import MinusFormPopup from "../components/MinusFormPopup";
-import Header from '../components/Header';
-import { getItemData, getCategoryData, manageItem, getTransactionHistory } from '../api_utils';
-import { DataTable } from 'primereact/datatable';
-import { Column } from 'primereact/column';
-import { InputText } from 'primereact/inputtext';
+import Header from "../components/Header";
+import {
+  getItemData,
+  getCategoryData,
+  manageItem,
+  getTransactionHistory,
+} from "../api_utils";
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
+import { InputText } from "primereact/inputtext";
 
 function CategoryDetailPage() {
   const { id } = useParams();
   const [currentLanguage, setCurrentLanguage] = useState("eng");
   const [isAddItemPopupOpen, setIsAddItemPopupOpen] = useState(false);
   const [categoryItems, setCategoryItems] = useState([]);
-  const [categoryName, setCategoryName] = useState({ nameEng: "", nameGuj: "" });
+  const [categoryName, setCategoryName] = useState({
+    nameEng: "",
+    nameGuj: "",
+  });
   const [selectedItem, setSelectedItem] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -27,7 +35,7 @@ function CategoryDetailPage() {
   const [transactionData, setTransactionData] = useState({});
   const [rows, setRows] = useState(5);
   const [first, setFirst] = useState(0);
-  const [globalFilter, setGlobalFilter] = useState('');
+  const [globalFilter, setGlobalFilter] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,34 +45,39 @@ function CategoryDetailPage() {
 
         // Fetch category details
         const categoryData = await getCategoryData();
-        const currentCategory = categoryData.find(cat => cat.categoryId === parseInt(id));
+        const currentCategory = categoryData.find(
+          (cat) => cat.categoryId === parseInt(id)
+        );
 
         if (!currentCategory) {
-          throw new Error('Category not found');
+          throw new Error("Category not found");
         }
 
         setCategoryName({
           nameEng: currentCategory.engName,
-          nameGuj: currentCategory.gujName
+          nameGuj: currentCategory.gujName,
         });
 
         // Fetch items for this category
         const items = await getItemData(parseInt(id));
-        const formattedItems = Array.isArray(items) ? items.map(item => ({
-          id: item.itemId,
-          nameEng: item.engName,
-          nameGuj: item.gujName,
-          quantity: item.qty || 0,
-          unit: item.unit || 'kg',
-          categoryId: item.categoryId,
-          createdAt: item.createdAt,
-          updatedAt: item.updatedAt
-        })) : [];
+        const formattedItems = Array.isArray(items)
+          ? items.map((item) => ({
+              id: item.itemId,
+              nameEng: item.engName,
+              nameGuj: item.gujName,
+              quantity: item.qty || 0,
+              unit: item.unit || "kg",
+              location: item.location || "No Location Alloted",
+              categoryId: item.categoryId,
+              createdAt: item.createdAt,
+              updatedAt: item.updatedAt,
+            }))
+          : [];
 
         setCategoryItems(formattedItems);
       } catch (err) {
-        setError(err.message || 'Failed to load items');
-        console.error('Error loading items:', err);
+        setError(err.message || "Failed to load items");
+        console.error("Error loading items:", err);
       } finally {
         setIsLoading(false);
       }
@@ -107,8 +120,8 @@ function CategoryDetailPage() {
       const response = await manageItem(formData);
       if (!response.errorStatus) {
         // Update the item quantity in the local state
-        setCategoryItems(prevItems =>
-          prevItems.map(item =>
+        setCategoryItems((prevItems) =>
+          prevItems.map((item) =>
             item.id === formData.itemId
               ? { ...item, quantity: response.data.item.qty }
               : item
@@ -116,7 +129,7 @@ function CategoryDetailPage() {
         );
       }
     } catch (error) {
-      console.error('Error managing item:', error);
+      console.error("Error managing item:", error);
       // Handle error (show error message to user)
     }
   };
@@ -126,8 +139,8 @@ function CategoryDetailPage() {
       const response = await manageItem(formData);
       if (!response.errorStatus) {
         // Update the item quantity in the local state
-        setCategoryItems(prevItems =>
-          prevItems.map(item =>
+        setCategoryItems((prevItems) =>
+          prevItems.map((item) =>
             item.id === formData.itemId
               ? { ...item, quantity: response.data.item.qty }
               : item
@@ -135,7 +148,7 @@ function CategoryDetailPage() {
         );
       }
     } catch (error) {
-      console.error('Error managing item:', error);
+      console.error("Error managing item:", error);
       // Handle error (show error message to user)
     } finally {
       setIsMinusFormPopupOpen(false);
@@ -149,10 +162,10 @@ function CategoryDetailPage() {
         newSet.delete(id);
       } else {
         newSet.add(id);
-        getTransactionHistory(id).then(data => {
-          setTransactionData(prev => ({
+        getTransactionHistory(id).then((data) => {
+          setTransactionData((prev) => ({
             ...prev,
-            [id]: data
+            [id]: data,
           }));
         });
       }
@@ -161,19 +174,21 @@ function CategoryDetailPage() {
   };
 
   const formatDate = (rowData) => {
-    if (!rowData.date) return '';
+    if (!rowData.date) return "";
     try {
       const date = new Date(rowData.date);
-      if (isNaN(date.getTime())) return ''; // Return empty string for invalid dates
+      if (isNaN(date.getTime())) return ""; // Return empty string for invalid dates
 
-      return date.toLocaleDateString('en-GB', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
-      }).replace(/\//g, '-');
+      return date
+        .toLocaleDateString("en-GB", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        })
+        .replace(/\//g, "-");
     } catch (error) {
-      console.error('Error formatting date:', error);
-      return '';
+      console.error("Error formatting date:", error);
+      return "";
     }
   };
 
@@ -185,7 +200,7 @@ function CategoryDetailPage() {
     const rowHeight = 43;
     const headerHeight = 37;
     const paginatorHeight = 53;
-    const totalHeight = (rows * rowHeight) + headerHeight + paginatorHeight;
+    const totalHeight = rows * rowHeight + headerHeight + paginatorHeight;
     return Math.min(Math.max(totalHeight, 200), 600);
   };
 
@@ -196,12 +211,16 @@ function CategoryDetailPage() {
         handleLanguageChange={handleLanguageChange}
       />
       <div className="category-detail-header">
-        <h1 style={{
-          backgroundColor: "#ffffff",
-          borderRadius: "50px",
-          color: "#2B3674"
-        }}>
-          {currentLanguage === "eng" ? categoryName.nameEng : categoryName.nameGuj}
+        <h1
+          style={{
+            backgroundColor: "#ffffff",
+            borderRadius: "50px",
+            color: "#2B3674",
+          }}
+        >
+          {currentLanguage === "eng"
+            ? categoryName.nameEng
+            : categoryName.nameGuj}
         </h1>
       </div>
 
@@ -212,7 +231,11 @@ function CategoryDetailPage() {
       ) : (
         <div className="card-container">
           {categoryItems.map((item) => (
-            <div key={item.id} className="card" style={{ backgroundColor: "#FFFFFF66" }}>
+            <div
+              key={item.id}
+              className="card"
+              style={{ backgroundColor: "#FFFFFF66" }}
+            >
               <div className="card-content">
                 <div className="card-header">
                   <button
@@ -222,7 +245,11 @@ function CategoryDetailPage() {
                       handleQuantityChange(item.id, 1);
                     }}
                   >
-                    <img src="/assets/new1.png" alt="Increase" className="icon" />
+                    <img
+                      src="/assets/new1.png"
+                      alt="Increase"
+                      className="icon"
+                    />
                   </button>
                   <button
                     className="quantity-button"
@@ -231,13 +258,35 @@ function CategoryDetailPage() {
                       handleQuantityChange(item.id, -1);
                     }}
                   >
-                    <img src="/assets/minus1.png" alt="Decrease" className="icon" />
+                    <img
+                      src="/assets/minus1.png"
+                      alt="Decrease"
+                      className="icon"
+                    />
                   </button>
                 </div>
-                <h2 className="card-title" onClick={() => toggleCard(item.id)} style={{ fontSize: "30px" }}>
+                <h2
+                  className="card-title"
+                  onClick={() => toggleCard(item.id)}
+                  style={{ fontSize: "30px" }}
+                >
                   {currentLanguage === "eng" ? item.nameEng : item.nameGuj}
                 </h2>
-                <p className="card-quantity" style={{ fontSize: "20px" }} onClick={() => toggleCard(item.id)}>{item.quantity} {item.unit}</p>
+                <p
+                  className="card-quantity"
+                  style={{ fontSize: "20px" }}
+                  onClick={() => toggleCard(item.id)}
+                >
+                  {item.quantity} {item.unit}
+                </p>
+                <p
+                  className="card-quantity"
+                  style={{ fontSize: "20px" }}
+                  // onClick={() => toggleCard(item.id)}
+                >
+                  {/* {item.quantity} {item.unit} */}
+                  Location : {item.location}
+                </p>
                 {/* <button 
                   className="expand-button"
                   onClick={() => toggleCard(item.id)}
@@ -268,8 +317,8 @@ function CategoryDetailPage() {
                     showGridlines
                     loading={!transactionData[item.id]}
                     rowClassName={(rowData) => ({
-                      'green-row': rowData.itemTo === 'Add',
-                      'red-row': rowData.itemTo === 'Remove'
+                      "green-row": rowData.itemTo === "Add",
+                      "red-row": rowData.itemTo === "Remove",
                     })}
                     paginator
                     rows={rows}
@@ -288,49 +337,49 @@ function CategoryDetailPage() {
                     <Column
                       header="Sr."
                       body={serialNumberTemplate}
-                      style={{ minWidth: '70px' }}
+                      style={{ minWidth: "70px" }}
                     />
                     <Column
                       field="itemName"
                       header="Name"
-                      style={{ minWidth: '100px' }}
+                      style={{ minWidth: "100px" }}
                       sortable
                     />
                     <Column
                       field="unit"
                       header="Unit"
-                      style={{ minWidth: '70px' }}
+                      style={{ minWidth: "70px" }}
                       sortable
                     />
                     <Column
                       field="type"
                       header="Type"
-                      style={{ minWidth: '80px' }}
+                      style={{ minWidth: "80px" }}
                       sortable
                     />
                     <Column
                       field="qty"
                       header="Qty"
-                      style={{ minWidth: '70px' }}
+                      style={{ minWidth: "70px" }}
                       sortable
                     />
                     <Column
                       field="date"
                       header="Date"
-                      style={{ minWidth: '130px' }}
+                      style={{ minWidth: "130px" }}
                       body={formatDate}
                       sortable
                     />
                     <Column
                       field="sevakName"
                       header="Sevak Name"
-                      style={{ minWidth: '120px' }}
+                      style={{ minWidth: "120px" }}
                       sortable
                     />
                     <Column
                       field="sevakNo"
                       header="Sevak Number"
-                      style={{ minWidth: '120px' }}
+                      style={{ minWidth: "120px" }}
                       sortable
                     />
                   </DataTable>
@@ -346,7 +395,11 @@ function CategoryDetailPage() {
         onClose={() => setIsAddItemPopupOpen(false)}
         onSubmit={handleAddItem}
         categoryId={id}
-        categoryName={currentLanguage === "eng" ? categoryName.nameEng : categoryName.nameGuj}
+        categoryName={
+          currentLanguage === "eng"
+            ? categoryName.nameEng
+            : categoryName.nameGuj
+        }
         currentLanguage={currentLanguage}
       />
       <PlusFormPopup

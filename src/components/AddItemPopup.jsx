@@ -5,6 +5,7 @@ function AddItemPopup({ isOpen, onClose, onSubmit, categoryId, categoryName, cur
   const [itemNameEng, setItemNameEng] = useState('');
   const [itemNameGuj, setItemNameGuj] = useState('');
   const [unit, setUnit] = useState('');
+  const [location, setLocation] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -14,6 +15,7 @@ function AddItemPopup({ isOpen, onClose, onSubmit, categoryId, categoryName, cur
         engName: itemNameEng,
         gujName: itemNameGuj,
         unit: unit,
+        location: location,
         createdBy: 1  // You might want to get this from user context
       };
       
@@ -21,6 +23,7 @@ function AddItemPopup({ isOpen, onClose, onSubmit, categoryId, categoryName, cur
       setItemNameEng('');
       setItemNameGuj('');
       setUnit('');
+      setLocation('');
       onClose();
     } catch (error) {
       console.error('Error submitting item:', error);
@@ -54,6 +57,7 @@ function AddItemPopup({ isOpen, onClose, onSubmit, categoryId, categoryName, cur
             <input
               type="text"
               id="itemNameEng"
+              // placeholder='Item Name (English)'
               value={itemNameEng}
               onChange={(e) => setItemNameEng(e.target.value)}
               required
@@ -65,6 +69,7 @@ function AddItemPopup({ isOpen, onClose, onSubmit, categoryId, categoryName, cur
             </label>
             <input
               type="text"
+              // placeholder='Item Name (Gujarati)'
               id="itemNameGuj"
               value={itemNameGuj}
               onChange={(e) => setItemNameGuj(e.target.value)}
@@ -75,13 +80,37 @@ function AddItemPopup({ isOpen, onClose, onSubmit, categoryId, categoryName, cur
             <label htmlFor="unit">
               {currentLanguage === 'eng' ? 'Unit' : 'એકમ'}:
             </label>
-            <input
-              type="text"
+            <select
               id="unit"
               value={unit}
               onChange={(e) => setUnit(e.target.value)}
               required
-            />
+            >
+              <option value="">
+                {currentLanguage === 'eng' ? 'Select Unit' : 'એકમ પસંદ કરો'}
+              </option>
+              <option value="Kg">Kg</option>
+              <option value="L">L</option>
+            </select>
+          </div>
+          <div className="form-group">
+            <label htmlFor="Location">
+              {currentLanguage === 'eng' ? 'Location' : 'સ્થળ'}:
+            </label>
+            <select
+              id="location"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              required
+            >
+              <option value="">
+                {currentLanguage === 'eng' ? 'Select Unit' : 'એકમ પસંદ કરો'}
+              </option>
+              <option value="HPYM Kothar">HPYM Kothar</option>
+              <option value="AVD">AVD</option>
+              <option value="Sukun Cold Storage">Sukun Cold Storage</option>
+              <option value="⁠Amar Cold Storage">⁠Amar Cold Storage</option>
+            </select>
           </div>
           <div className="button-group">
             <button type="submit" className="submit-button">
