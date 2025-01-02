@@ -282,7 +282,7 @@ function CategoryDetailPage() {
                 <p
                   className="card-quantity"
                   style={{ fontSize: "20px" }}
-                  // onClick={() => toggleCard(item.id)}
+                  onClick={() => toggleCard(item.id)}
                 >
                   {/* {item.quantity} {item.unit} */}
                   Location : {item.location}
