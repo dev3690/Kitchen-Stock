@@ -184,6 +184,16 @@ function ReportsPage({ currentLanguage, handleLanguageChange }) {
         return props.rowIndex + 1 + (props.paginator ? props.first : 0);
     };
 
+    const onPageChange1 = (event) => {
+        setFirst1(event.first);
+        setRows(event.rows);
+    };
+
+    const onPageChange2 = (event) => {
+        setFirst2(event.first);
+        setRows(event.rows);
+    };
+
     return (
         <div className="reports-container">
             <Header
@@ -241,7 +251,7 @@ function ReportsPage({ currentLanguage, handleLanguageChange }) {
                         paginator
                         rows={rows}
                         first={first1}
-                        onPage={(e) => setFirst1(e.first)}
+                        onPage={onPageChange1}
                         globalFilter={globalFilterPurchase}
                         sortMode="multiple"
                         removableSort
@@ -295,7 +305,7 @@ function ReportsPage({ currentLanguage, handleLanguageChange }) {
                         paginator
                         rows={rows}
                         first={first2}
-                        onPage={(e) => setFirst2(e.first)}
+                        onPage={onPageChange2}
                         globalFilter={globalFilterUsage}
                         sortMode="multiple"
                         removableSort
