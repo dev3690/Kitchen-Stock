@@ -14,6 +14,7 @@ const assignItemToPradesh = `${localApiUrl}/assignItemToPradesh`
 const getPradeshItemsDetails = (id) => `${localApiUrl}/getPradeshItemsDetails`
 const getManageItemsByItemId = `${localApiUrl}/getManageItemsByItemId`
 const getManageItems = `${localApiUrl}/getManageItems`
+const searchApi = `${localApiUrl}/search`
 
 const headers = {
     'Content-Type': 'application/json'
@@ -150,6 +151,19 @@ const getManageItemsData = async () => {
   }
 };
 
+const searchItems = async (keyword) => {
+  try {
+    const response = await callAxiosApi(searchApi, { keyword });
+    if (response.data.success) {
+      return response.data.items || [];
+    }
+    return [];
+  } catch (error) {
+    console.error('Error searching items:', error);
+    return [];
+  }
+};
+
 export {
     loginApi,
     dashboardApi,
@@ -163,5 +177,7 @@ export {
     insertItemData,
     manageItem,
     getTransactionHistory,
-    getManageItemsData
+    getManageItemsData,
+    searchApi,
+    searchItems
 }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import "../styles/CategoryDetailPage.css";
 import { AuthContext } from "../context/AuthContext";
 import AddItemPopup from "../components/AddItemPopup";
@@ -18,6 +18,8 @@ import { InputText } from "primereact/inputtext";
 
 function CategoryDetailPage() {
   const { id } = useParams();
+  const location = useLocation();
+  const selectedItemId = location.state?.selectedItemId;
   const [currentLanguage, setCurrentLanguage] = useState("eng");
   const [isAddItemPopupOpen, setIsAddItemPopupOpen] = useState(false);
   const [categoryItems, setCategoryItems] = useState([]);
@@ -85,6 +87,22 @@ function CategoryDetailPage() {
 
     fetchData();
   }, [id]);
+
+  useEffect(() => {
+    if (selectedItemId) {
+      const element = document.getElementById(`item-${selectedItemId}`);
+      if (element) {
+        element.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center' 
+        });
+        element.classList.add('highlighted');
+        setTimeout(() => {
+          element.classList.remove('highlighted');
+        }, 2000);
+      }
+    }
+  }, [selectedItemId, categoryItems]);
 
   const handleQuantityChange = (id, change) => {
     if (change > 0) {
@@ -233,7 +251,8 @@ function CategoryDetailPage() {
           {categoryItems.map((item) => (
             <div
               key={item.id}
-              className="card"
+              id={`item-${item.id}`}
+              className={`card grain-card ${selectedItemId === item.id ? 'highlighted' : ''}`}
               style={{ backgroundColor: "#FFFFFF66" }}
             >
               <div className="card-content">
@@ -312,7 +331,6 @@ function CategoryDetailPage() {
                     value={transactionData[item.id] || []}
                     scrollable
                     scrollHeight={`${calculateScrollHeight()}px`}
-                    scrollDirection="both"
                     stripedRows
                     size="small"
                     showGridlines

@@ -203,3 +203,12 @@
 .p-datatable-striped .p-datatable-tbody > tr.red-row:nth-child(even) {
     background-color: rgba(255, 76, 76, 0.15) !important;
 }
+
+.grain-card {
+  transition: background-color 0.3s ease;
+}
+
+.highlighted {
+  background-color: rgba(39, 134, 222, 0.1);
+  box-shadow: 0 0 8px rgba(39, 134, 222, 0.2);
+}

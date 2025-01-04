@@ -5,7 +5,7 @@ import { AuthContext } from '../context/AuthContext';
 import AddItemPopup from '../components/AddItemPopup';
 import { FaSearch } from 'react-icons/fa';
 import Header from '../components/Header';
-import { getCategoryData, insertItemData } from '../api_utils';
+import { getCategoryData, insertItemData, searchApi, callAxiosApi } from '../api_utils';
 import { AutoComplete } from 'primereact/autocomplete';
 
 function DashboardPage({ changeLanguage, language }) {
@@ -94,35 +94,49 @@ function DashboardPage({ changeLanguage, language }) {
     return items;
   };
 
-  const searchItems = (event) => {
-    const query = event.query.toLowerCase();
-    const allItems = getAllItems();
-    
-    const filtered = allItems.filter(item => {
-      const itemName = currentLanguage === 'eng' ? 
-        item.nameEng.toLowerCase() : 
-        item.nameGuj.toLowerCase();
-      return itemName.includes(query);
-    });
-
-    setSuggestions(filtered);
+  const searchItems = async (event) => {
+    try {
+      const response = await callAxiosApi(searchApi, {
+        keyword: event.query
+      });
+      
+      if (response.data.success) {
+        setSuggestions(response.data.items || []);
+      } else {
+        setSuggestions([]);
+      }
+    } catch (error) {
+      console.error('Error searching items:', error);
+      setSuggestions([]);
+    }
   };
 
   const onItemSelect = (e) => {
-    setSelectedItem(e.value);
-    if (e.value?.categoryId) {
-      navigate(`/category/${e.value.categoryId}`);
-    }
+    return;
   };
 
   const itemTemplate = (item) => {
     return (
       <div className="search-item">
-        <div className="search-item-name">
-          {currentLanguage === 'eng' ? item.nameEng : item.nameGuj}
+        <div className="search-item-names">
+          <span className="item-name-eng">{item.engName}</span>
+          <span className="separator">|</span>
+          <span className="item-name-guj">{item.gujName}</span>
         </div>
-        <div className="search-item-category">
-          {item.categoryName}
+        <div className="search-item-details">
+          <div className="search-item-category">
+            <span className="category-eng">{item.categoryName}</span>
+            <span className="separator">|</span>
+            <span className="category-guj">{item.categoryGujName}</span>
+          </div>
+          <div className="search-item-quantity">
+            {item.location && (
+              <span className="location">({item.location})</span>
+            )}
+            {item.qty && (
+              <span className="quantity">{item.qty} {item.unit}</span>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -146,13 +160,12 @@ function DashboardPage({ changeLanguage, language }) {
               value={searchQuery}
               suggestions={suggestions}
               completeMethod={searchItems}
-              field={currentLanguage === 'eng' ? 'nameEng' : 'nameGuj'}
+              field={currentLanguage === 'eng' ? 'engName' : 'gujName'}
               onChange={(e) => setSearchQuery(e.value)}
-              onSelect={onItemSelect}
               placeholder={currentLanguage === 'eng' ? "Search items..." : "વસ્તુઓ શોધો..."}
               itemTemplate={itemTemplate}
               className="search-autocomplete"
-              delay={0}
+              delay={300}
               showClear
             />
           </div>
